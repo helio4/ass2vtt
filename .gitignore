@@ -1,8 +1,16 @@
-# Compiled class file
+# Compiled source
 *.class
+*.com
+*.dll
+*.exe
+*.o
+*.so
+*.jnlp
 
-# Log file
+# Log file and DB
 *.log
+*.sql
+*.sqlite
 
 # BlueJ files
 *.ctxt
@@ -21,3 +29,11 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# Netbeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
