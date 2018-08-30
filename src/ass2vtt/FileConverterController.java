@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 import javafx.fxml.FXML;
@@ -71,7 +72,7 @@ public class FileConverterController implements Initializable {
         }
         try {
             Scanner scanner = new Scanner(ass_area.getText()); 
-            PrintWriter writer = new PrintWriter(outputFolder.getAbsoluteFile() + "\\Ass2VttOutput.vtt");
+            PrintWriter writer = new PrintWriter(outputFolder.getAbsoluteFile() + "\\Ass2VttOutput.vtt", StandardCharsets.UTF_8.name());
             writer.print("WEBVTT\n\n");
             while(scanner.hasNextLine()) {
                 //Dialogue line format: "Dialogue: Layer(0), Start(1), End(2), Style(3), Name(4), MarginL(5), MarginR(6), MarginV(7), Effect(8), Text(9)
@@ -140,9 +141,9 @@ public class FileConverterController implements Initializable {
                 }
 
             }
-            return res;
+            return res.replace("\\N", "\n");
         } else {
-            return text;
+            return text.replace("\\N", "\n");
         }
     }
     
