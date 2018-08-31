@@ -6,7 +6,6 @@
 package ass2vtt;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -54,20 +53,8 @@ public class FileConverterController implements Initializable {
     
     @FXML
     public void convert() {
-        if(ass_area.getText().isEmpty()) {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setTitle("ERROR: No file selected");
-            alert.setHeaderText("There was an error with the file");
-            alert.setContentText("Please select a file to convert");
-            alert.show();
-            return;
-        }
         if (outputFolder == null) {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setTitle("ERROR: No folder selected");
-            alert.setHeaderText("There was an error with the folder");
-            alert.setContentText("Please select the folder where the resultand vtt file will be saved");
-            alert.show();
+            showAlert(AlertType.ERROR, "ERROR: No folder selected", "There was an error with the folder", "Please select the folder where the resultand vtt file will be saved");
             return;
         }
         try {
@@ -79,21 +66,17 @@ public class FileConverterController implements Initializable {
                 String line = scanner.nextLine();
                 if(line.startsWith("Dialogue: ")) {
                     line = line.replaceFirst("^Dialogue: ", "");
-                    String[] info = line.split(",", 10);
-                    writer.print(convertTime(info[1]) + " --> " + convertTime(info[2]) + "\n");
-                    writer.print(convertLine(info[1], info[9]) + "\n\n");
+                    String[] lineData = line.split(",", 10);
+                    writer.print(convertTime(lineData[1]) + " --> " + convertTime(lineData[2]) + "\n");
+                    writer.print(convertLine(lineData[1], lineData[9]) + "\n\n");
                 }
             }
             scanner.close();
             writer.close();
         } catch (Exception e) {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setTitle("ERROR");
-            alert.setHeaderText("There was an error while converting");
-            alert.setContentText(e.toString());
-            alert.show();
+            showAlert(AlertType.ERROR, "ERROR", "There was an error while converting", e.toString());
         }
-        
+        showAlert(AlertType.INFORMATION, "SUCCESS", "The conversion was successfully completed!", "");
     }
     
     public void selectFile() {
@@ -116,17 +99,17 @@ public class FileConverterController implements Initializable {
     
     public Stage getStage() {return mainStage;}
 
-    private String convertLine(String start, String text) {
-        if (text.startsWith("{\\")) {
+    private String convertLine(String start, String line) {
+        if (line.startsWith("{\\")) {
             String res = "";
             Timer currentTime = new Timer(start);
-            text = reformatInput(text);
-            while(!text.isEmpty()) {
+            line = reformatLine(line);
+            while(!line.isEmpty()) {
                 String aux = "";
                 int i = 0;
-                if (text.startsWith("{")){
+                if (line.startsWith("{")){
                     for(i = 3; !aux.matches("\\{\\S{2}\\d+\\}"); i++) {
-                         aux = text.substring(0, i);
+                         aux = line.substring(0, i);
                     }
                 }
                 if(!aux.equals("")) {
@@ -134,16 +117,16 @@ public class FileConverterController implements Initializable {
                     int ms = Integer.parseInt(aux);
                     currentTime.add(ms);
                     res += "<" + currentTime.toString() + ">";
-                    text = text.substring(i - 1);
+                    line = line.substring(i - 1);
                 } else {
-                    res += text.charAt(0);
-                    text = text.substring(1);
+                    res += line.charAt(0);
+                    line = line.substring(1);
                 }
 
             }
             return res.replace("\\N", "\n");
         } else {
-            return text.replace("\\N", "\n");
+            return line.replace("\\N", "\n");
         }
     }
     
@@ -151,24 +134,24 @@ public class FileConverterController implements Initializable {
         return "0" + time + "0";
     }
     
-    private String reformatInput(String input) {
+    private String reformatLine(String line) {
         String res = "";
-        String[] syllables = input.split("\\{\\S{2}\\d+\\}");
+        String[] syllables = line.split("\\{\\S{2}\\d+\\}");
         String[] timeMarks = new String[syllables.length - 1];
         int index = 0;
-        while(!input.isEmpty() && index < timeMarks.length) {
+        while(!line.isEmpty() && index < timeMarks.length) {
             String aux = "";
             int i = 0;
-            if (input.startsWith("{")){
+            if (line.startsWith("{")){
                 for(i = 3; !aux.matches("\\{\\S{2}\\d+\\}"); i++) {
-                     aux = input.substring(0, i);
+                     aux = line.substring(0, i);
                 }
             }
             if(!aux.equals("")) {
                 timeMarks[index++] = aux;
-                input = input.substring(i - 1);
+                line = line.substring(i - 1);
             } else {
-                input = input.substring(1);
+                line = line.substring(1);
             }
         }
         timeMarks[timeMarks.length-1] = "";
@@ -176,5 +159,13 @@ public class FileConverterController implements Initializable {
             res += syllables[i + 1] + timeMarks[i];
         }
         return res;
+    }
+    
+    private void showAlert(AlertType type, String title, String header, String content) {
+        Alert alert = new Alert(type);
+            alert.setTitle(title);
+            alert.setHeaderText(header);
+            alert.setContentText(content);
+            alert.show();
     }
 }
