@@ -6,7 +6,9 @@
 package ass2vtt;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ResourceBundle;
@@ -29,7 +31,8 @@ import javafx.stage.Stage;
  * @author helio4
  */
 public class FileConverterController implements Initializable {
-
+    
+    @FXML
     private TextField file_field;
     @FXML
     private TextField folder_field;
@@ -42,7 +45,7 @@ public class FileConverterController implements Initializable {
     
     private Stage mainStage;
     @FXML
-    private TextArea ass_area;
+    private Button select_file;
     /**
      * Initializes the controller class.
      */
@@ -53,13 +56,17 @@ public class FileConverterController implements Initializable {
     
     @FXML
     public void convert() {
+        if(assFile == null) {
+            showAlert(AlertType.ERROR, "ERROR: No file selected", "There was an error with the file", "Please select a file to convert");
+            return;
+        }
         if (outputFolder == null) {
             showAlert(AlertType.ERROR, "ERROR: No folder selected", "There was an error with the folder", "Please select the folder where the resultand vtt file will be saved");
             return;
         }
         try {
-            Scanner scanner = new Scanner(ass_area.getText()); 
-            PrintWriter writer = new PrintWriter(outputFolder.getAbsoluteFile() + "\\Ass2VttOutput.vtt", StandardCharsets.UTF_8.name());
+            Scanner scanner = new Scanner(assFile, StandardCharsets.UTF_8.name()); 
+            PrintWriter writer = new PrintWriter(outputFolder.getAbsoluteFile() + "\\" + assFile.getName().substring(0, assFile.getName().length() - 4) + ".vtt", StandardCharsets.UTF_8.name());
             writer.print("WEBVTT\n\n");
             while(scanner.hasNextLine()) {
                 //Dialogue line format: "Dialogue: Layer(0), Start(1), End(2), Style(3), Name(4), MarginL(5), MarginR(6), MarginV(7), Effect(8), Text(9)
@@ -73,12 +80,15 @@ public class FileConverterController implements Initializable {
             }
             scanner.close();
             writer.close();
-        } catch (Exception e) {
-            showAlert(AlertType.ERROR, "ERROR", "There was an error while converting", e.toString());
+        } catch (FileNotFoundException e) {
+            showAlert(AlertType.ERROR, "ERROR", "Couldn't find the specified file.", e.toString());
+        } catch(UnsupportedEncodingException e) {
+            showAlert(AlertType.ERROR, "ERROR", "Encoding not supported, please use UTF_8.", e.toString());
         }
-        showAlert(AlertType.INFORMATION, "SUCCESS", "The conversion was successfully completed!", "");
+        showAlert(AlertType.INFORMATION, "SUCCESS", "The conversion has been successfully completed!", "");
     }
     
+    @FXML
     public void selectFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose an .ass file");
