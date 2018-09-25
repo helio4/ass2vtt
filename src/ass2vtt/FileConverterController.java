@@ -6,6 +6,7 @@
 package ass2vtt;
 
 import ass2vtt.Converters.Ass2VttConverter;
+import ass2vtt.Converters.Vtt2AssConverter;
 import ass2vtt.Converters.iConverter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -112,6 +113,11 @@ public class FileConverterController implements Initializable {
         if (source.equals(".ass")) {
             switch(target){
                 case ".vtt": return new Ass2VttConverter();
+            }
+        }
+        if (source.equals(".vtt")) {
+            switch(target){
+                case ".ass": return new Vtt2AssConverter();
             }
         }
         return null;
