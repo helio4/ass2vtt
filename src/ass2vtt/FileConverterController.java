@@ -5,12 +5,15 @@
  */
 package ass2vtt;
 
+import ass2vtt.Converters.Ass2VttConverter;
+import ass2vtt.Converters.iConverter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 import javafx.fxml.FXML;
@@ -41,7 +44,9 @@ public class FileConverterController implements Initializable {
     @FXML
     private Button convert;
     
-    private File outputFolder, assFile;
+    private File outputDirectory, file;
+    
+    private iConverter converter;
     
     private Stage mainStage;
     @FXML
@@ -56,29 +61,24 @@ public class FileConverterController implements Initializable {
     
     @FXML
     public void convert() {
-        if(assFile == null) {
+        if(file == null) {
             showAlert(AlertType.ERROR, "ERROR: No file selected", "There was an error with the file", "Please select a file to convert");
             return;
         }
-        if (outputFolder == null) {
+        if (outputDirectory == null) {
             showAlert(AlertType.ERROR, "ERROR: No folder selected", "There was an error with the folder", "Please select the folder where the resultand vtt file will be saved");
             return;
         }
         try {
-            Scanner scanner = new Scanner(assFile, StandardCharsets.UTF_8.name()); 
-            PrintWriter writer = new PrintWriter(outputFolder.getAbsoluteFile() + "\\" + assFile.getName().substring(0, assFile.getName().length() - 4) + ".vtt", StandardCharsets.UTF_8.name());
-            writer.print("WEBVTT\n\n");
-            while(scanner.hasNextLine()) {
-                //Dialogue line format: "Dialogue: Layer(0), Start(1), End(2), Style(3), Name(4), MarginL(5), MarginR(6), MarginV(7), Effect(8), Text(9)
-                String line = scanner.nextLine();
-                if(line.startsWith("Dialogue: ")) {
-                    line = line.replaceFirst("^Dialogue: ", "");
-                    String[] lineData = line.split(",", 10);
-                    writer.print(convertTime(lineData[1]) + " --> " + convertTime(lineData[2]) + "\n");
-                    writer.print(convertLine(lineData[1], lineData[9]) + "\n\n");
-                }
+            String sourceFormat = file.getName().substring(file.getName().indexOf('.'));
+            String targetFormat = sourceFormat.equals(".ass") ? ".vtt" : ".ass";
+            PrintWriter writer = new PrintWriter(outputDirectory.getAbsoluteFile() + "\\" + file.getName().substring(0, file.getName().indexOf('.')) + targetFormat, StandardCharsets.UTF_8.name());
+            converter = rightConverter(sourceFormat, targetFormat);
+            if(converter == null) {
+                showAlert(AlertType.ERROR, "ERROR: Conversion not supported", "Can't convert from " + sourceFormat + " to " + targetFormat, ""); 
+                return;
             }
-            scanner.close();
+            writer.print(converter.convert(file));
             writer.close();
         } catch (FileNotFoundException e) {
             showAlert(AlertType.ERROR, "ERROR", "Couldn't find the specified file.", e.toString());
@@ -92,84 +92,34 @@ public class FileConverterController implements Initializable {
     public void selectFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose an .ass file");
-        fileChooser.getExtensionFilters().add(new ExtensionFilter(".ass", "*.ass"));
-        assFile = fileChooser.showOpenDialog(mainStage.getScene().getWindow());
-        file_field.setText(assFile.getPath());
+        ArrayList<String> extensions = new ArrayList();
+        extensions.add("*.ass");
+        extensions.add("*.vtt");
+        fileChooser.getExtensionFilters().add(new ExtensionFilter(".ass, .vtt", extensions));
+        file = fileChooser.showOpenDialog(mainStage.getScene().getWindow());
+        file_field.setText(file.getPath());
     }
     
     @FXML
     public void selectFolder() {
         DirectoryChooser dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Select a directory to save the vtt file");
-        outputFolder = dirChooser.showDialog(mainStage.getScene().getWindow());
-        folder_field.setText(outputFolder.getPath());
+        outputDirectory = dirChooser.showDialog(mainStage.getScene().getWindow());
+        folder_field.setText(outputDirectory.getPath());
+    }
+    
+    private iConverter rightConverter (String source, String target) {
+        if (source.equals(".ass")) {
+            switch(target){
+                case ".vtt": return new Ass2VttConverter();
+            }
+        }
+        return null;
     }
     
     public void setStage(Stage stage) {mainStage = stage;}
     
     public Stage getStage() {return mainStage;}
-
-    private String convertLine(String start, String line) {
-        if (line.startsWith("{\\")) {
-            String res = "";
-            Timer currentTime = new Timer(start);
-            line = reformatLine(line);
-            while(!line.isEmpty()) {
-                String aux = "";
-                int i = 0;
-                if (line.startsWith("{")){
-                    for(i = 3; !aux.matches("\\{\\S{2}\\d+\\}"); i++) {
-                         aux = line.substring(0, i);
-                    }
-                }
-                if(!aux.equals("")) {
-                    aux = aux.substring(3, aux.length() - 1);
-                    int ms = Integer.parseInt(aux);
-                    currentTime.add(ms);
-                    res += "<" + currentTime.toString() + ">";
-                    line = line.substring(i - 1);
-                } else {
-                    res += line.charAt(0);
-                    line = line.substring(1);
-                }
-
-            }
-            return res.replace("\\N", "\n");
-        } else {
-            return line.replace("\\N", "\n");
-        }
-    }
-    
-    private String convertTime(String time) {
-        return "0" + time + "0";
-    }
-    
-    private String reformatLine(String line) {
-        String res = "";
-        String[] syllables = line.split("\\{\\S{2}\\d+\\}");
-        String[] timeMarks = new String[syllables.length - 1];
-        int index = 0;
-        while(!line.isEmpty() && index < timeMarks.length) {
-            String aux = "";
-            int i = 0;
-            if (line.startsWith("{")){
-                for(i = 3; !aux.matches("\\{\\S{2}\\d+\\}"); i++) {
-                     aux = line.substring(0, i);
-                }
-            }
-            if(!aux.equals("")) {
-                timeMarks[index++] = aux;
-                line = line.substring(i - 1);
-            } else {
-                line = line.substring(1);
-            }
-        }
-        timeMarks[timeMarks.length-1] = "";
-        for (int i = 0; i < timeMarks.length; i++) {
-            res += syllables[i + 1] + timeMarks[i];
-        }
-        return res;
-    }
     
     private void showAlert(AlertType type, String title, String header, String content) {
         Alert alert = new Alert(type);
