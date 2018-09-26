@@ -24,16 +24,18 @@ public class Vtt2AssConverter implements iConverter {
             while(scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 if(line.matches("0?\\d?:?\\d\\d:\\d\\d.\\d\\d\\d --> 0?\\d?:?\\d\\d:\\d\\d.\\d\\d\\d.*")) {
-                    line = line.replace(" ", "");
-                    String[] times = line.split("-->");
+                    String[] splitedLine = line.split(" "); 
                     String text = "";
-                    int numLines = 1;
-                    while(scanner.hasNext()) {
+                    if(scanner.hasNextLine()) {
                         String aux = scanner.nextLine();
-                        if ("".equals(aux)) break;
-                        text += aux + "\\N";
+                        text += aux;
+                        while(!aux.equals("") && scanner.hasNextLine()) {
+                            aux = scanner.nextLine();
+                            if(aux.equals("")) break;
+                            text += "\\N" + aux;
+                        }
                     }
-                    res += "Dialogue: 0," + convertTime(times[0]) + "," + convertTime(times[1]) + ",Default,,0,0,0,," + text + "\n";
+                    res += "Dialogue: 0," + convertTime(splitedLine[0]) + "," + convertTime(splitedLine[2]) + ",Default,,0,0,0,," + convertLine(splitedLine[0], splitedLine[2], text) + "\n";
                 }
             }
         scanner.close();
@@ -42,5 +44,53 @@ public class Vtt2AssConverter implements iConverter {
     
     private String convertTime(String time) {
         return time.substring(1, time.length() - 1);
+    }
+    
+    private String convertLine(String start, String end, String line) {
+        if (!line.matches(".*<0?\\d?:?\\d\\d:\\d\\d.\\d\\d\\d>.*")) return line;
+        String res = "";
+        String[] text = line.split("<0?\\d?:?\\d\\d:\\d\\d.\\d\\d\\d>");
+        String[] timeMarks = new String[text.length - 1];
+        int index = 0;
+        while(!line.isEmpty() && index < timeMarks.length) {
+            if(line.matches("<0?\\d?:?\\d\\d:\\d\\d.\\d\\d\\d>.*")) {
+                timeMarks[index++] = line.substring(1, line.indexOf('>'));
+                line = line.substring(line.indexOf('>') + 1);
+            } else {
+                line = line.substring(1);
+            }
+        }
+        for(index = 0; index < timeMarks.length; index++) {
+            String ms = differenceInMillis(start, timeMarks[index]);
+            res += "{\\k" + ms.substring(0, ms.length() - 1) + "}" + text[index];
+            start = timeMarks[index];
+        }
+        String ms = differenceInMillis(timeMarks[timeMarks.length - 1], end);
+        res += "{\\k" + ms.substring(0, ms.length() - 1) + "}" + text[text.length - 1];
+        return res;
+    }
+    
+    private String differenceInMillis(String start, String end) {
+        return (timeInMillis(end) - timeInMillis(start)) + "";
+    }
+    
+    private int timeInMillis(String time) {
+        int res = 0;
+        String[] timeS = time.replace(".", ":").split(":");
+        int[] timeI = new int[timeS.length];
+        for(int i = 0; i < timeS.length; i++) {
+            timeI[i] = Integer.parseInt(timeS[i]);
+        }
+        if(timeI.length == 3) {
+            res += timeI[2];
+            res += timeI[1] * 1000;
+            res += timeI[0] * 60 * 1000;
+        } else if(timeI.length == 4) {
+            res += timeI[3];
+            res += timeI[2] * 1000;
+            res += timeI[1] * 60 * 1000;
+            res += timeI[0] * 60 * 60 * 1000;
+        }
+        return res;
     }
 }
