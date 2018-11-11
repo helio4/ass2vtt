@@ -7,6 +7,7 @@ package ass2vtt;
 
 import ass2vtt.Converters.Ass2VttConverter;
 import ass2vtt.Converters.Vtt2AssConverter;
+import ass2vtt.Converters.Vtt2TtmlConverter;
 import ass2vtt.Converters.iConverter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,14 +17,14 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
-import java.util.Scanner;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -52,6 +53,8 @@ public class FileConverterController implements Initializable {
     private Stage mainStage;
     @FXML
     private Button select_file;
+    @FXML
+    private ToggleGroup outputFormat;
     /**
      * Initializes the controller class.
      */
@@ -72,7 +75,8 @@ public class FileConverterController implements Initializable {
         }
         try {
             String sourceFormat = file.getName().substring(file.getName().indexOf('.'));
-            String targetFormat = sourceFormat.equals(".ass") ? ".vtt" : ".ass";
+            RadioButton selected = (RadioButton) outputFormat.getSelectedToggle();
+            String targetFormat = selected.getText();
             PrintWriter writer = new PrintWriter(outputDirectory.getAbsoluteFile() + "\\" + file.getName().substring(0, file.getName().indexOf('.')) + targetFormat, StandardCharsets.UTF_8.name());
             converter = rightConverter(sourceFormat, targetFormat);
             if(converter == null) {
@@ -85,6 +89,8 @@ public class FileConverterController implements Initializable {
             showAlert(AlertType.ERROR, "ERROR", "Couldn't find the specified file.", e.toString());
         } catch(UnsupportedEncodingException e) {
             showAlert(AlertType.ERROR, "ERROR", "Encoding not supported, please use UTF_8.", e.toString());
+        } catch (Exception e) {
+            showAlert(AlertType.ERROR, "ERROR", "Something went wrong!", e.toString());
         }
         showAlert(AlertType.INFORMATION, "SUCCESS", "The conversion has been successfully completed!", "");
     }
@@ -113,11 +119,13 @@ public class FileConverterController implements Initializable {
         if (source.equals(".ass")) {
             switch(target){
                 case ".vtt": return new Ass2VttConverter();
+                case ".ttml": return null;
             }
         }
         if (source.equals(".vtt")) {
             switch(target){
                 case ".ass": return new Vtt2AssConverter();
+                case ".ttml": return new Vtt2TtmlConverter();
             }
         }
         return null;
