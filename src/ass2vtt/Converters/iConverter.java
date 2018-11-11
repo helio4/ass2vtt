@@ -14,5 +14,5 @@ import java.io.UnsupportedEncodingException;
  * @author jemarhe
  */
 public interface iConverter {
-    public String convert(File file) throws FileNotFoundException, UnsupportedEncodingException;
+    public String convert(File file) throws FileNotFoundException, UnsupportedEncodingException, Exception;
 }
