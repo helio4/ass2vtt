@@ -26,14 +26,14 @@ public class Timer {
         hours = Integer.parseInt(splited[0]);
         minutes = Integer.parseInt(splited[1]);
         seconds = Integer.parseInt(splited[2]);
-        ms = Integer.parseInt(splited[3]);
+        ms = Integer.parseInt(splited[3]) * 10;
     }
     
     public void add(int milliseconds) {
         ms = ms + milliseconds;
-        if(ms >= 100) {
-            seconds = seconds + (ms/100);
-            ms = ms%100;
+        if(ms >= 1000) {
+            seconds = seconds + (ms/1000);
+            ms = ms%1000;
         }
         if(seconds >= 60) {
             minutes = minutes + (seconds/60);
@@ -54,9 +54,18 @@ public class Timer {
         else res += minutes + ":";
         if(seconds < 10) res += "0" + seconds + ".";
         else res += seconds + ".";
-        if(ms < 10) res += "0" + ms + "0";
-        else res += ms + "0";
+        if(ms < 100) res += "0" + ms;
+        else res += ms;
         return res;
+    }
+    
+    public int getTotalMillis() {
+        int millis = 0;
+        millis += hours * 3600000;
+        millis += minutes * 60000;
+        millis += seconds * 1000;
+        millis += ms;
+        return millis;
     }
     
     public int getMinutes() {return minutes;}
