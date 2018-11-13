@@ -17,7 +17,7 @@ are a few things to keep in mind when styling on Aegisub's styles manager:
 then the edge type #1 (shadow) with the shadow's color will be applied.
 
 I think these are the main "exceptions" to keep in mind.
-### What is not supported in the conversion?
+### What is not supported?
 Keep in mind you can still do some of these manually by editing the .xml file, but here's a list of what this conversion does not support (yet):
 * Partial coloring/styling with .ass tags (eg. {\c}, {\i1}, etc.) 
 * Aegisub's styles manager's Margins and Miscellaneous options.
