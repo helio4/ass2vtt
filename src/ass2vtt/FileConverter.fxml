@@ -36,11 +36,11 @@
                         <ToggleGroup fx:id="outputFormat" />
                      </toggleGroup>
                   </RadioButton>
+                  <RadioButton mnemonicParsing="false" text=".xml" toggleGroup="$outputFormat" />
                   <RadioButton mnemonicParsing="false" text=".ttml" toggleGroup="$outputFormat" />
                   <RadioButton mnemonicParsing="false" text=".ass" textAlignment="RIGHT" toggleGroup="$outputFormat" />
                </children>
             </VBox>
-            <Label />
             <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                <children>
                   <Button fx:id="convert" alignment="BOTTOM_CENTER" mnemonicParsing="false" onAction="#convert" prefHeight="25.0" prefWidth="90.0" text="Convert" HBox.hgrow="NEVER" />

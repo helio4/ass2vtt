@@ -53,14 +53,13 @@ public class Ass2VttConverter implements iConverter  {
                 if(!aux.equals("")) {
                     aux = aux.substring(3, aux.length() - 1);
                     int ms = Integer.parseInt(aux);
-                    currentTime.add(ms);
+                    currentTime.add(ms * 10);
                     res += "<" + currentTime.toString() + ">";
                     line = line.substring(i - 1);
                 } else {
                     res += line.charAt(0);
                     line = line.substring(1);
                 }
-
             }
             return res.replace("\\N", "\n");
         } else {
