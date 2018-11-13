@@ -160,7 +160,7 @@ public class Ass2XmlConverter implements iConverter {
         String bgInfo = background ? "bc=\"" + backColour + "\" bo=\"" + backgroundOpacity + "\""  : "bo=\"0\"";
         String edgeInfo = "";
         if(edgeOpacity > 127) {edgeInfo = "et=\"3\" ec=\"" + edgeColor + "\"";}
-        else if(!background) {edgeInfo = "et=\"1\" ec=\"" + backColour + "\"";}
+        else if(!background && backgroundOpacity != 0) {edgeInfo = "et=\"1\" ec=\"" + backColour + "\"";}
         //Primary Style
         styles.put(name, new String[]{Integer.toString(lastId + 1), Integer.toString(lastId + 2), alignment});
         res += "<pen id=\"" + ++lastId + "\" fs=\"" + font + "\" fc=\"" + primaryColour + "\" fo=\"" + foregroundOpacity + "\" " + bgInfo + " " + edgeInfo + " b=\"" + bold + "\" i=\"" + italic + "\" u=\"" + underline  + "\" />\n";
