@@ -98,22 +98,23 @@ public class Ass2XmlConverter implements iConverter {
         String res = "";
         Timer startTimer = new Timer(start);
         Timer endTimer = new Timer(end);
-        if(line.matches(".*\\{\\\\pos\\(\\d+.?\\d+?,\\d+\\.?\\d+?\\)\\}.*") && resX > 0 && resY > 0) {
+        if(line.matches(".*\\{\\\\pos\\(\\d+(.\\d+)?,\\d+(.\\d+)?\\)\\}.*") && resX > 0 && resY > 0) {
             String aux = line;
             boolean found = false;
             String posTag = "";
             while(aux.length() > 0 && !found) {
-                if (aux.matches("^\\{\\\\pos\\(\\d+.?\\d+?,\\d+\\.?\\d+?\\)\\}.*")) {
+                if (aux.matches("^\\{\\\\pos\\(\\d+(.\\d+)?,\\d+(.\\d+)?\\)\\}.*")) {
                     posTag = aux.substring(0, aux.indexOf("}") + 1);
                     found = true;
                 }
                 aux = aux.substring(1);
             }
             wpID = Integer.toString(posTagToWP(posTag, styleIDs[2]));
-            line = String.join("", line.split("\\{\\\\pos\\(\\d+.?\\d+?,\\d+\\.?\\d+?\\)\\}"));
+            line = String.join("", line.split("\\{\\\\pos\\(\\d+(.\\d+)?,\\d+(.\\d+)?\\)\\}"));
         }
         if(!line.matches(".*\\{\\\\k\\d*\\}.*")) {
             int duration = endTimer.getTotalMillis() - startTimer.getTotalMillis();
+            line = symbolToEscapeSequenceXML(line);
             res +="<p t=\"" + startTimer.getTotalMillis() + "\" d=\"" + duration + "\" wp=\"" + wpID + "\"><s p=\"" + styleIDs[0] + "\">" + line + "</s></p>\n\n";
         } else {
             Timer currentTimer = startTimer;
@@ -132,7 +133,7 @@ public class Ass2XmlConverter implements iConverter {
             for(index = 0; index < text.length; index++) {
                 String[] leftSide = Arrays.copyOfRange(text, 0, index + 1);
                 String[] rightSide = Arrays.copyOfRange(text, index + 1, text.length);
-                res += "<p t=\"" + currentTimer.getTotalMillis() + "\" d=\"" + timeMarks[index] + "0\" wp=\"" + wpID + "\"><s p=\"" + styleIDs[0] + "\">"+ String.join("", leftSide) + "</s>&#8203;<s p=\"" + styleIDs[1] + "\">" + String.join("", rightSide) + "</s></p>\n";;
+                res += "<p t=\"" + currentTimer.getTotalMillis() + "\" d=\"" + timeMarks[index] + "0\" wp=\"" + wpID + "\"><s p=\"" + styleIDs[0] + "\">"+ symbolToEscapeSequenceXML(String.join("", leftSide)) + "</s>&#8203;<s p=\"" + styleIDs[1] + "\">" + symbolToEscapeSequenceXML(String.join("", rightSide)) + "</s></p>\n";;
                 currentTimer.add(Integer.parseInt(timeMarks[index] + "0"));
             }
         }
@@ -194,5 +195,9 @@ public class Ass2XmlConverter implements iConverter {
         int specifiedAV = (int) ((realAV - 2) / 0.96);
         stylePart += "<wp id=\"" + ++lastWp + "\" ap=\"" + alignmentMap.get(alignment) + "\" ah=\"" + specifiedAH + "\" av=\"" + specifiedAV + "\" />\n";
         return lastWp;
+    }
+    
+    private String symbolToEscapeSequenceXML(String text) {
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 }
