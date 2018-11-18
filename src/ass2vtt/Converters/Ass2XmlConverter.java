@@ -98,19 +98,19 @@ public class Ass2XmlConverter implements iConverter {
         String res = "";
         Timer startTimer = new Timer(start);
         Timer endTimer = new Timer(end);
-        if(line.matches(".*\\{\\\\pos\\(\\d+,\\d+\\)\\}.*") && resX > 0 && resY > 0) {
+        if(line.matches(".*\\{\\\\pos\\(\\d+.?\\d+?,\\d+\\.?\\d+?\\)\\}.*") && resX > 0 && resY > 0) {
             String aux = line;
             boolean found = false;
             String posTag = "";
             while(aux.length() > 0 && !found) {
-                if (aux.matches("^\\{\\\\pos\\(\\d+,\\d+\\)\\}.*")) {
+                if (aux.matches("^\\{\\\\pos\\(\\d+.?\\d+?,\\d+\\.?\\d+?\\)\\}.*")) {
                     posTag = aux.substring(0, aux.indexOf("}") + 1);
                     found = true;
                 }
                 aux = aux.substring(1);
             }
             wpID = Integer.toString(posTagToWP(posTag, styleIDs[2]));
-            line = String.join("", line.split("\\{\\\\pos\\(\\d+,\\d+\\)\\}"));
+            line = String.join("", line.split("\\{\\\\pos\\(\\d+.?\\d+?,\\d+\\.?\\d+?\\)\\}"));
         }
         if(!line.matches(".*\\{\\\\k\\d*\\}.*")) {
             int duration = endTimer.getTotalMillis() - startTimer.getTotalMillis();
