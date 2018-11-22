@@ -51,6 +51,11 @@ public class Ass2XmlConverter implements iConverter {
     private int lastWp = 9;
     private int resX, resY;
     private String stylePart = "", subsPart = "";
+    private boolean shift60;
+    
+    public void Ass2XmlConverter(boolean shift60) {
+        this.shift60 = shift60;
+    }
     
     @Override
     public String convert(File file) throws FileNotFoundException, UnsupportedEncodingException, Exception {
@@ -101,6 +106,10 @@ public class Ass2XmlConverter implements iConverter {
         String res = "";
         Timer startTimer = new Timer(start);
         Timer endTimer = new Timer(end);
+        if(shift60) {
+            startTimer.add(-60);
+            endTimer.add(-60);
+        }
         if(line.matches(".*\\{\\\\pos\\(\\d+(.\\d+)?,\\d+(.\\d+)?\\)\\}.*") && resX > 0 && resY > 0) {
             String aux = line;
             boolean found = false;
@@ -123,7 +132,11 @@ public class Ass2XmlConverter implements iConverter {
             Timer currentTimer = startTimer;
             String[] text = line.split("\\{\\\\k\\d*\\}");
             text = Arrays.copyOfRange(text, 1, text.length);
-            String[] timeMarks = new String[text.length];
+            Pattern pattern = Pattern.compile("\\{\\\\k\\d*\\}");
+            Matcher matcher = pattern.matcher(line);
+            int count = 0;
+            while (matcher.find())count++;
+            String[] timeMarks = new String[count];
             int index = 0;
             while(!line.isEmpty() && index < timeMarks.length) {
                 if(line.matches("\\{\\\\k\\d*\\}.*")) {
@@ -133,6 +146,11 @@ public class Ass2XmlConverter implements iConverter {
                     line = line.substring(1);
                 }
             }
+            int lastTimeMark = Integer.parseInt(timeMarks[text.length - 1]);
+            for(int i = 0; i < timeMarks.length - text.length; i++) {
+                lastTimeMark += Integer.parseInt(timeMarks[text.length + i]); 
+            }
+            timeMarks[text.length - 1] = lastTimeMark + "";
             for(index = 0; index < text.length; index++) {
                 String[] leftSide = Arrays.copyOfRange(text, 0, index + 1);
                 String[] rightSide = Arrays.copyOfRange(text, index + 1, text.length);

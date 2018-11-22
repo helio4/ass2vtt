@@ -99,7 +99,7 @@ public class FileConverterController implements Initializable {
     @FXML
     public void selectFile() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Choose an .ass file");
+        fileChooser.setTitle("Choose an .ass or .vtt file");
         ArrayList<String> extensions = new ArrayList();
         extensions.add("*.ass");
         extensions.add("*.vtt");
