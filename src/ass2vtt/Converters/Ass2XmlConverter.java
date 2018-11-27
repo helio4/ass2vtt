@@ -53,7 +53,7 @@ public class Ass2XmlConverter implements iConverter {
     private String stylePart = "", subsPart = "";
     private boolean shift60;
     
-    public void Ass2XmlConverter(boolean shift60) {
+    public Ass2XmlConverter(boolean shift60) {
         this.shift60 = shift60;
     }
     

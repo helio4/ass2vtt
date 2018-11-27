@@ -18,13 +18,17 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -51,17 +55,35 @@ public class FileConverterController implements Initializable {
     
     private iConverter converter;
     
+    DirectoryChooser dirChooser = new DirectoryChooser();
+    FileChooser fileChooser = new FileChooser();
+    
     private Stage mainStage;
     @FXML
     private Button select_file;
     @FXML
     private ToggleGroup outputFormat;
+    @FXML
+    private CheckBox shift60;
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
+        outputFormat.selectedToggleProperty().addListener(new ChangeListener<Toggle>(){
+            @Override
+            public void changed(ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
+                 if (outputFormat.getSelectedToggle() != null) {
+                    RadioButton selectedRadioButton = (RadioButton) outputFormat.getSelectedToggle();
+                    if(selectedRadioButton.getText().equals(".xml")) {
+                        shift60.setDisable(false);
+                    } else {
+                        shift60.setDisable(true);
+                    }
+                 }
+            }
+        });
     }    
     
     @FXML
@@ -98,22 +120,24 @@ public class FileConverterController implements Initializable {
     
     @FXML
     public void selectFile() {
-        FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose an .ass or .vtt file");
         ArrayList<String> extensions = new ArrayList();
         extensions.add("*.ass");
         extensions.add("*.vtt");
         fileChooser.getExtensionFilters().add(new ExtensionFilter(".ass, .vtt", extensions));
-        file = fileChooser.showOpenDialog(mainStage.getScene().getWindow());
-        file_field.setText(file.getPath());
+        File aux = fileChooser.showOpenDialog(mainStage.getScene().getWindow());
+        file = aux == null ? file : aux;
+        if(file == null) file_field.setText("");
+        else file_field.setText(file.getPath());
     }
     
     @FXML
     public void selectFolder() {
-        DirectoryChooser dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Select a directory to save the vtt file");
-        outputDirectory = dirChooser.showDialog(mainStage.getScene().getWindow());
-        folder_field.setText(outputDirectory.getPath());
+        File aux = dirChooser.showDialog(mainStage.getScene().getWindow());
+        outputDirectory = aux == null ? outputDirectory : aux;
+        if(outputDirectory == null) folder_field.setText("");
+        else folder_field.setText(outputDirectory.getPath());
     }
     
     private iConverter rightConverter (String source, String target) {
@@ -121,13 +145,14 @@ public class FileConverterController implements Initializable {
             switch(target){
                 case ".vtt": return new Ass2VttConverter();
                 case ".ttml": return null;
-                case ".xml": return new Ass2XmlConverter();
+                case ".xml": return new Ass2XmlConverter(shift60.isSelected());
             }
         }
         if (source.equals(".vtt")) {
             switch(target){
                 case ".ass": return new Vtt2AssConverter();
                 case ".ttml": return new Vtt2TtmlConverter();
+                case ".xml" : return null;
             }
         }
         return null;
