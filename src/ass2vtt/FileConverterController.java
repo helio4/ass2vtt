@@ -65,6 +65,10 @@ public class FileConverterController implements Initializable {
     private ToggleGroup outputFormat;
     @FXML
     private CheckBox shift60;
+    @FXML
+    private CheckBox fadingKaraoke;
+    @FXML
+    private CheckBox karaokeOnPhone;
     /**
      * Initializes the controller class.
      */
@@ -78,8 +82,12 @@ public class FileConverterController implements Initializable {
                     RadioButton selectedRadioButton = (RadioButton) outputFormat.getSelectedToggle();
                     if(selectedRadioButton.getText().equals(".xml")) {
                         shift60.setDisable(false);
+                        fadingKaraoke.setDisable(false);
+                        karaokeOnPhone.setDisable(false);
                     } else {
                         shift60.setDisable(true);
+                        fadingKaraoke.setDisable(true);
+                        karaokeOnPhone.setDisable(true);
                     }
                  }
             }
@@ -145,7 +153,7 @@ public class FileConverterController implements Initializable {
             switch(target){
                 case ".vtt": return new Ass2VttConverter();
                 case ".ttml": return null;
-                case ".xml": return new Ass2XmlConverter(shift60.isSelected());
+                case ".xml": return new Ass2XmlConverter(shift60.isSelected(), karaokeOnPhone.isSelected(), fadingKaraoke.isSelected());
             }
         }
         if (source.equals(".vtt")) {

@@ -5,10 +5,12 @@
  */
 package ass2vtt;
 
+import ass2vtt.Converters.Ass2XmlConverter;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 /**
@@ -25,7 +27,7 @@ public class Ass2Vtt extends Application {
         controller.setStage(stage);
         
         Scene scene = new Scene(root);
-        
+        Font.loadFont(Ass2Vtt.class.getResource("Roboto-Medium.ttf").toExternalForm(), 26.0);
         stage.setTitle("Ass2Vtt");
         stage.setScene(scene);
         stage.show();
@@ -37,5 +39,4 @@ public class Ass2Vtt extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
 }
