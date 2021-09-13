@@ -30,4 +30,4 @@ Keep in mind you can still do some of these manually by editing the .xml (Format
 * Strikeout/Strikethrough text.
 
 # ⚠Final note⚠
-**This project is no longer being maintained, so if you are interested in Format3 (now also called YTT) conversion, I wholeheartedly encourage you to check arc's [YTSubConverter](https://github.com/arcusmaximus/YTSubConverter). Not only is being actively maintained but it's also richer in features.**
+**This project is no longer being maintained, so if you are interested in Format3 (now also called YTT) conversion, I wholeheartedly encourage you to check arc's [YTSubConverter](https://github.com/arcusmaximus/YTSubConverter). Not only it's being actively maintained but it's also richer in features.**
